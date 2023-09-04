@@ -5,11 +5,10 @@ import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-public class CreateAccountTests extends TestBase {
-    //precondition: user should be logged out
-
+public class LoginTests extends TestBase {
     @BeforeMethod
     public void ensurePrecondition (){
+        //precondition: user should be logged out
         if(!isLoginLinkPresent()) {
             clickOnSignOutButton();
         }
@@ -18,11 +17,12 @@ public class CreateAccountTests extends TestBase {
     }
 
     @Test
-    public void existedUserRegistrationNegativeTest(){
+    public void loginPositiveTest(){
+        //enter email - [placeholder='Email'] - css
         fillLoginRegistrationForm("leno@gmail.com", "Bernd1234$");
-        //click on Registration button - //button[text()='Registration'] - xpath
-        clickOnRegistrationButton();
-        //assert alert is appeared
-        Assert.assertTrue(isAlertPresent());
+        //click on Login button
+        click(By.xpath("//button[.='Login']"));
+        //assert Sign Out button present
+        Assert.assertTrue(isElementPresent2(By.xpath("//button[contains(.,'Sign Out')]")));
     }
 }
