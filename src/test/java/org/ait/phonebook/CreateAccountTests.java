@@ -1,6 +1,6 @@
 package org.ait.phonebook;
 
-import org.openqa.selenium.By;
+import org.ait.phonebook.models.User;
 import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -10,19 +10,21 @@ public class CreateAccountTests extends TestBase {
 
     @BeforeMethod
     public void ensurePrecondition (){
-        if(!isLoginLinkPresent()) {
-            clickOnSignOutButton();
+        if(!app.getUser().isLoginLinkPresent()) {
+            app.getUser().clickOnSignOutButton();
         }
         //click on Login link - a:nth-child(4) - css
-        clickOnLoginLink();
+        app.getUser().clickOnLoginLink();
     }
 
     @Test
     public void existedUserRegistrationNegativeTest(){
-        fillLoginRegistrationForm("leno@gmail.com", "Bernd1234$");
+        app.getUser().fillLoginRegistrationForm(new User()
+                .setEmail("leno@gmail.com")
+                .setPassword("Bernd1234$"));
         //click on Registration button - //button[text()='Registration'] - xpath
-        clickOnRegistrationButton();
+        app.getUser().clickOnRegistrationButton();
         //assert alert is appeared
-        Assert.assertTrue(isAlertPresent());
+        Assert.assertTrue(app.getUser().isAlertPresent());
     }
 }

@@ -1,55 +1,113 @@
 package org.ait.phonebook;
 
+import org.ait.phonebook.models.Contact;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 import org.testng.Assert;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
+
+
 
 public class AddContactsTest extends TestBase{
     @BeforeMethod
     public void ensurePrecondition(){
-        if (!isLoginLinkPresent()) {
-            clickOnSignOutButton();
+        if (!app.getUser().isLoginLinkPresent()) {
+            app.getUser().clickOnSignOutButton();
         }
-        clickOnLoginLink();
-        fillLoginRegistrationForm("leno@gmail.com", "Bernd1234$");
-        click(By.xpath("//button[.='Login']"));
+        app.getUser().login();
         //click on ADD link - [href='/add'] - css
-        click(By.cssSelector("[href='/add']"));
+        app.getContact().clickOnAddLink();
     }
 
     @Test
     public void addContactPositiveTest(){
         //enter all input fields in contact form - input:nth-child(1) - css
-        type(By.cssSelector("input:nth-child(1)"),"Karl");
-        type(By.cssSelector("input:nth-child(2)"),"Adam");
-        type(By.cssSelector("input:nth-child(3)"),"1234567890");
-        type(By.cssSelector("input:nth-child(4)"),"adam@gm.com");
-        type(By.cssSelector("input:nth-child(5)"),"Koblenz");
-        type(By.cssSelector("input:nth-child(6)"),"goalkeeper");
+        app.getContact().fillContactForm(new Contact()
+                .setName("Karl")
+                .setSurname("Adam")
+                .setPhone("1234567890")
+                .setEmail("adam@gm.com")
+                .setAddress("Koblenz")
+                .setDesc("goalkeeper"));
         //click on Save button - .add_form__2rsm2 button - css
-        click(By.cssSelector(".add_form__2rsm2 button"));
+        app.getContact().clickOnSaveButton();
         //assert by text contact is added
-        Assert.assertTrue(isContactAdded("Karl"));
+        Assert.assertTrue(app.getContact().isContactAdded("Karl"));
     }
 
     @AfterMethod
     public void postCondition(){
-        click(By.cssSelector(".contact-item_card__2SOIM"));
-        click(By.xpath("//button[.='Remove']"));
+        app.getContact().removeContact();
     }
 
+    @DataProvider
+    public Iterator<Object[]> newContact() {
+        List<Object[]> list = new ArrayList<>();
+        list.add(new Object[]{"Oliver", "Kan", "1234567890", "kan@gm.com", "Berlin", "goalkeeper"});
+        list.add(new Object[]{"Oliver1", "Kan", "1234567898", "kan@gm.com", "Berlin", "goalkeeper"});
+        list.add(new Object[]{"Oliver2", "Kan", "1234567899", "kan@gm.com", "Berlin", "goalkeeper"});
 
-    public boolean isContactAdded(String text){
-        List<WebElement> contacts = driver.findElements(By.cssSelector("h2"));
-        for (WebElement el: contacts) {
-            if (el.getText().contains(text))
-                return true;
+        return list.iterator();
+    }
+
+    @DataProvider
+    public Iterator<Object[]> newContactWithCSVFile() throws IOException {
+        List<Object[]> list = new ArrayList<>();
+
+        BufferedReader reader = new BufferedReader(new FileReader
+                (new File("src/test/resources/contact.csv")));
+
+        String line = reader.readLine();
+        while (line != null) {
+            String[] split = line.split(",");
+
+            list.add(new Object[]{new Contact().setName(split[0])
+                    .setSurname(split[1])
+                    .setPhone(split[2])
+                    .setEmail(split[3])
+                    .setAddress(split[4])
+                    .setDesc(split[5])});
+            line = reader.readLine();
         }
-        return false;
+        return list.iterator();
     }
+
+    @Test(dataProvider = "newContact")
+    public void addContactPositiveTestFromDataProvider(String name, String surname, String phone,
+                                                       String email, String address, String description) {
+
+        app.getContact().fillContactForm(new Contact()
+                .setName(name)
+                .setSurname(surname)
+                .setPhone(phone)
+                .setEmail(email)
+                .setAddress(address)
+                .setDesc(description));
+
+        app.getContact().clickOnSaveButton();
+
+        Assert.assertTrue(app.getContact().isContactAdded(name));
+    }
+
+    @Test(dataProvider = "newContactWithCSVFile")
+    public void addContactPositiveTestFromDataProviderWithCSV(Contact contact) {
+
+        app.getContact().fillContactForm(contact);
+        app.getContact().pause(1000);
+        app.getContact().clickOnSaveButton();
+
+        Assert.assertEquals(Integer.toString(app.getContact().sizeOfContacts()), "1");
+    }
+
 }

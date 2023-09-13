@@ -1,28 +1,56 @@
 package org.ait.phonebook;
 
-import org.openqa.selenium.By;
+import org.ait.phonebook.models.User;
 import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
+
+import java.awt.*;
+import java.io.IOException;
 
 public class LoginTests extends TestBase {
     @BeforeMethod
     public void ensurePrecondition (){
         //precondition: user should be logged out
-        if(!isLoginLinkPresent()) {
-            clickOnSignOutButton();
+        if(!app.getUser().isLoginLinkPresent()) {
+            app.getUser().clickOnSignOutButton();
         }
         //click on Login link - a:nth-child(4) - css
-        clickOnLoginLink();
+        app.getUser().clickOnLoginLink();
     }
 
     @Test
     public void loginPositiveTest(){
         //enter email - [placeholder='Email'] - css
-        fillLoginRegistrationForm("leno@gmail.com", "Bernd1234$");
+        app.getUser().fillLoginRegistrationForm(new User().setEmail("leno@gmail.com").setPassword("Bernd1234$"));
         //click on Login button
-        click(By.xpath("//button[.='Login']"));
+        app.getUser().clickOnLoginButton();
         //assert Sign Out button present
-        Assert.assertTrue(isElementPresent2(By.xpath("//button[contains(.,'Sign Out')]")));
+        Assert.assertTrue(app.getUser().isSignOutButtonPresent());
     }
+    @Test
+    public void loginNegativeWithoutEmailTest(){
+        //enter email - [placeholder='Email'] - css
+        app.getUser().fillLoginRegistrationForm(new User().setPassword( "Bernd1234$"));
+        //click on Login button
+        app.getUser().clickOnLoginButton();
+        //assert Sign Out button present
+        Assert.assertTrue(app.getUser().isAlertPresent());
+    }
+
+    @Test
+    public void loginPositiveTestWithScreencast() throws IOException, AWTException {
+        app.getUser().deleteScreencast();
+        app.getUser().startRecording();
+
+        app.getUser().fillLoginRegistrationFormForScreencast(new User()
+                .setEmail("leno@gmail.com")
+                .setPassword("Bernd1234$"));
+        app.getUser().clickOnLoginButton();
+        app.getUser().pause(2000);
+
+        app.getUser().stopRecording();
+
+    }
+
 }
