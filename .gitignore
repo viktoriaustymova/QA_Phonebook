@@ -1,11 +1,10 @@
+.gradle
 build/classes/
 build/generated/
 build/reports/
 build/resources/
 build/tmp/
 
-.gradle
-build/
 !gradle/wrapper/gradle-wrapper.jar
 !**/src/main/**/build/
 !**/src/test/**/build/
@@ -14,15 +13,11 @@ gradlew
 gradlew/
 
 ### IntelliJ IDEA ###
-.idea
+.idea/
 out/
 *.iws
 *.iml
 *.ipr
-
-out/
-!**/src/main/**/out/
-!**/src/test/**/out/
 
 ### Eclipse ###
 .apt_generated
@@ -50,7 +45,6 @@ bin/
 .DS_Store
 
 .bat
-
-.log
-.png
-.avi
+*.log
+*.png
+*.avi
